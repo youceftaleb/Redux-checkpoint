@@ -1,26 +1,28 @@
 import './App.css'
 import { todos } from './data'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { TodoItem } from './components/todo-item';
 import { AddTask } from './components/add-task';
 import { Search } from './components/search-bar';
 import todoListLogo from '../public/logo.png';
 import { Logo } from './components/logo-container';
 
+import { useSelector,useDispatch } from 'react-redux';
+
 function App() {
-  const [todoList, setTodoList] = useState([]);
-  const [filter, setFilter] = useState("");
+  const filter = useSelector(state => state.FilterReducer.filter);
+  const todoList = useSelector(state => state.TodoListReducer.todoList);
+  const dispatch = useDispatch();
+
   const handleSetFilter = (text) => {
-    setFilter(text);
+    dispatch({ type: 'CHANGEFILTER', payload: text });
   }
   useEffect(() => {
-    setTodoList(todos);
-  }, []);
-  useEffect(() => {
     if (filter === '') {
-      setTodoList(todos);
+      dispatch({type:'CHANGETODOLIST',payload:todos});
     } else {
-      setTodoList(todos.filter(todo => todo.title.toLowerCase().includes(filter.toLocaleLowerCase())));
+      const filteredtodo = todos.filter(todo => todo.title.includes(filter));
+      dispatch({ type: 'CHANGETODOLIST', payload: filteredtodo });
     }
   }, [filter]);
   const handleAddTodo = (txt) => {
@@ -29,15 +31,15 @@ function App() {
       title: txt,
       isFinished: false,
     }
-    setTodoList([...todoList, newItem]);
+    dispatch({ type: 'CHANGETODOLIST', payload: [...todoList, newItem] });
   }
   const handleRemoveTodo = (id) => {
     const newArr  = todoList.filter((item) => item.id !== id);
-    setTodoList(newArr);
+    dispatch({ type: 'CHANGETODOLIST', payload: newArr });
   }
   const handleTrue = (id) => {
     const newArr = todoList.map(item => item.id === id ? { ...item, isFinished: true } : item)
-    setTodoList(newArr);
+    dispatch({ type: 'CHANGETODOLIST', payload: newArr });
   }
   return (
       <div className="p-0 container-fluid">
@@ -61,4 +63,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
